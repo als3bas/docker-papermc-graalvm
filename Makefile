@@ -24,12 +24,12 @@ stop: ## docker-compose stop --rmi all --remove-orphans: ## (stops and cleans up
 
 .PHONY: down
 down: ## down server
-	@echo "👎🏻down server..."; \
+	@echo "👎🏻 Down server..."; \
 	docker-compose down;
 
 .PHONY: build
-build: # build the server with paper latest
-	@echo "🛠️ Building server" ; \
+build: # Rebuild the docker container and try to get the latest papermc version
+	@echo "🛠️ Building server and getting latest papermc version" ; \
 	make stop; \
 	make start; \
 	make logs;
@@ -50,6 +50,6 @@ attach: ## docker attach mcserver ## (attaches to minecraft paper jar for issuin
 	docker attach mcserver;
 
 .PHONY: logs
-logs: ## show logs
+logs: ## Show the last 20 lines of the logs
 	echo "🧻 Logs..."; \
 	docker-compose logs --tail 20 -f ;
