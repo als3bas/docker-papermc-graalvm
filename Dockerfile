@@ -1,34 +1,45 @@
 ########################################################
-############## We use a java base image ################
+## We want to use a Graalvm image bc it suppose to be ##
+##          faster than the normal java image.         ##
 ########################################################
-FROM eclipse-temurin:17-jre AS build
-RUN apt-get update -y && apt-get install -y curl jq
+
+FROM ghcr.io/graalvm/graalvm-ce:ol9-java17-22.3.1 as build
+RUN microdnf install -y curl jq
 
 LABEL Marc Tönsing <marc@marc.tv>
+LABEL Sebas Álvaro <https://asgg.cl>
 
-ARG version=1.19.3
-
+# Set the minecraft version
+ARG MCVERSION=1.19.3
 
 ########################################################
-############## Download Paper with API #################
+## Then Download papermc and build it with graalvm.   ##
+##                 and Marc's script                  ##
 ########################################################
 WORKDIR /opt/minecraft
 COPY ./getpaperserver.sh /
 RUN chmod +x /getpaperserver.sh
-RUN /getpaperserver.sh ${version}
+
+## clean posible jar to force update
+RUN rm /opt/minecraft/paperclip.jar || true
+RUN rm /opt/minecraft/paperspigot.jar || true
+
+## download latest papermc 
+RUN /getpaperserver.sh ${MCVERSION}
 
 ########################################################
-############## Running environment #####################
+## Then Download papermc and build it with graalvm.   ##
 ########################################################
-FROM eclipse-temurin:17-jre AS runtime
+FROM ghcr.io/graalvm/graalvm-ce:ol9-java17-22.3.1 as runtime
 ARG TARGETARCH
-# Install gosu
-RUN set -eux; \
- apt-get update; \
- apt-get install -y gosu; \
- rm -rf /var/lib/apt/lists/*; \
-# verify that the binary works
- gosu nobody true
+
+# Install gosu since doesn't exist in oracle linux repos
+ARG GOSUVERSION=1.16
+RUN set -eux
+RUN curl -fsSL "https://github.com/tianon/gosu/releases/download/${GOSUVERSION}/gosu-${TARGETARCH}" -o /usr/bin/gosu && \
+    chmod +x /usr/bin/gosu && \
+    gosu nobody true && \
+    microdnf clean all && rm -rf /var/cache/yum
 
 # Working directory
 WORKDIR /data
@@ -40,7 +51,7 @@ COPY --from=build /opt/minecraft/paperclip.jar /opt/minecraft/paperspigot.jar
 ARG RCON_CLI_VER=1.6.0
 ADD https://github.com/itzg/rcon-cli/releases/download/${RCON_CLI_VER}/rcon-cli_${RCON_CLI_VER}_linux_${TARGETARCH}.tar.gz /tmp/rcon-cli.tgz
 RUN tar -x -C /usr/local/bin -f /tmp/rcon-cli.tgz rcon-cli && \
-  rm /tmp/rcon-cli.tgz
+    rm /tmp/rcon-cli.tgz
 
 # Volumes for the external data (Server, World, Config...)
 VOLUME "/data"
@@ -68,4 +79,3 @@ RUN chmod +x /opt/minecraft/docker-entrypoint.sh
 
 # Entrypoint
 ENTRYPOINT ["/opt/minecraft/docker-entrypoint.sh"]
-

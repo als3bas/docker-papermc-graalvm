@@ -1,7 +1,10 @@
 version: "3.9"
 services:
   minecraft:
-    image: "als3bas/graalvm-papermc:1.19"
+    # image: "als3bas/graalvm-papermc:1.19"
+    build:
+      dockerfile:  ./Dockerfile
+      context: ./
     restart: always
     container_name: "mcserver"
     environment:
@@ -12,6 +15,7 @@ services:
       - "./:/data:rw"
     ports:
       - "25565:25565"
+      - "19132:19132"
     # The following allow `docker attach minecraft` to work
     stdin_open: true
     tty: true

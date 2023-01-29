@@ -4,8 +4,6 @@ on:
   push:
       branches:
       - 'master'
-  schedule:
-  - cron: "0 */12 * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -24,7 +22,7 @@ jobs:
       with:
         user: ${{ secrets.DOCKER_HUB_USERNAME }}
         pass: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-        slug: marctv/minecraft-papermc-server
+        slug: als3bas/graalvm-papermc
         readme: ./README.md
         description: Minecraft Java Server 1.19+ — Starts fast, runs stable and is always up-to-date.
     - name: Set up QEMU
@@ -42,4 +40,4 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: marctv/minecraft-papermc-server:latest,marctv/minecraft-papermc-server:1.19
+        tags: als3bas/graalvm-papermc:latest,als3bas/graalvm-papermc:1.19
