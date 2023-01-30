@@ -1,13 +1,12 @@
 version: "3.9"
 services:
   minecraft:
-    image: "als3bas/graalvm-papermc:1.19"
+    image: "als3bas/graalvm-papermc:latest"
     restart: always
     container_name: "mcserver"
     environment:
-      MEMORYSIZE: "10G"
+      MEMORYSIZE: "1G"
       PAPERMC_FLAGS: ""
-      TZ: "America/Santiago"
     volumes:
       - "./:/data:rw"
     ports:
